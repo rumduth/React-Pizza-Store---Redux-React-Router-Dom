@@ -42,9 +42,11 @@ const userSlice = createSlice({
   reducers: {
     updateName(state, action) {
       state.username = action.payload;
+      localStorage.setItem('username', state.username);
     },
     setDiningOption(state, action) {
       state.diningOption = action.payload;
+      localStorage.setItem('diningOption', state.diningOption);
     },
     createSession(state) {
       state.hasValidSession = true;

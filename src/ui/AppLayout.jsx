@@ -4,19 +4,27 @@ import { useSelector } from "react-redux";
 import CartOverview from "../features/cart/CartOverview";
 import Header from "./Header";
 import Loader from "./Loader";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { setDiningOption, updateName, createSession } from "../features/user/userSlice";
+
 
 export default function AppLayout() {
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
   const pathName = useResolvedPath();
-  const location = useLocation();
-  
   const hasValidSession = useSelector((state) => state.user.hasValidSession);
-  
-  // If no valid session and not already on home page, redirect to home
-  if (!hasValidSession && location.pathname !== "/") {
-    return <Navigate to="/" />;
-  }
+  const dispatch = useDispatch();
+
+  //Help to retrieve user infomration in the localStorage
+  useEffect(function(){
+    const username = localStorage.getItem('username') ?? '';
+    const diningOption = localStorage.getItem('diningOption') ?? '';
+    if(!username || !diningOption) return;
+    dispatch(updateName(username));
+    dispatch(setDiningOption(diningOption));
+    dispatch(createSession());
+  },[]);
 
   return (
     <div className="grid h-screen grid-rows-[auto_1fr_auto]">
@@ -29,7 +37,7 @@ export default function AppLayout() {
               <Outlet />
             </main>
           </div>
-          {!pathName.pathname.startsWith("/cart") && <CartOverview />}
+          {!pathName.pathname.startsWith("/cart") && hasValidSession && <CartOverview />}
         </>
       )}
     </div>

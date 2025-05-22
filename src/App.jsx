@@ -16,10 +16,9 @@ import { loader as menuLoader } from "./features/menu/Menu";
 import { loader as orderLoader } from "./features/order/Order";
 import { action as createOrderAction } from "./features/order/CreateOrder";
 import { action as updateOrderAction } from "./features/order/UpdateOrder";
-import { useSelector } from "react-redux";
 
 function ProtectedRoute({ children }) {
-  const username = useSelector((state) => state.user.username);
+  const username = localStorage.getItem('username');
   if (!username) return <Navigate to="/" />;
   return children;
 }
