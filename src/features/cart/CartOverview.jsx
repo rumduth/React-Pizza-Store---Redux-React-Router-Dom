@@ -13,7 +13,10 @@ function CartOverview() {
     setIsOpen(!isOpen);
   };
 
-  if (!cart.length) return null;
+  if (!cart.length){
+    if(isOpen) setIsOpen(false);
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
