@@ -27,13 +27,12 @@ export const fetchAddress = createAsyncThunk(
 );
 
 const initialState = {
-  username: "",
-  status: "idle",
+  username: localStorage.getItem('username') ?? '',
   position: {},
   address: "",
   error: "",
-  hasValidSession: false,
-  diningOption: "", // "dineIn" or "delivery"
+  hasValidSession: localStorage.getItem('username') ? true : false,
+  diningOption: localStorage.getItem('diningOption') ?? ''
 };
 
 const userSlice = createSlice({

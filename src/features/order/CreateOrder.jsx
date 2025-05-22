@@ -153,7 +153,6 @@ export async function action({ request }) {
   const orderHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
   orderHistory.push(id);
   localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
-  localStorage.setItem('activeOrderId', id);
 
   return redirect(`/order/${id}`);
 }

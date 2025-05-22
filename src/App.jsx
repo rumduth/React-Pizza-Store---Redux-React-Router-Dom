@@ -14,6 +14,7 @@ import Error from "./ui/Error";
 
 import { loader as menuLoader } from "./features/menu/Menu";
 import { loader as orderLoader } from "./features/order/Order";
+import {loader as historyLoader} from "./features/order/OrderHistory";
 import { action as createOrderAction } from "./features/order/CreateOrder";
 import { action as updateOrderAction } from "./features/order/UpdateOrder";
 import OrderHistory from "./features/order/OrderHistory";
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
 
     children: [
       { path: "", element: <Home /> },
-      { path: 'history', element: <OrderHistory /> },
+      { path: 'history', element: <OrderHistory />, loader: historyLoader },
       {
         path: "menu",
         element: (

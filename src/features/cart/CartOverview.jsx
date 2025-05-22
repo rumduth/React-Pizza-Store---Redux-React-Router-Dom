@@ -1,83 +1,44 @@
 // src/features/cart/CartOverview.jsx
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { getOrder } from "../../services/apiRestaurant";
-
+import { useState } from "react";
+import { increaseItemQuantity, decreaseItemQuantity } from "./cartSlice";
+import { useDispatch } from "react-redux";
 function CartOverview() {
   const cart = useSelector((state) => state.cart.cart);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeOrder, setActiveOrder] = useState(null);
   const totalPizzas = cart.reduce((prev, cur) => cur.quantity + prev, 0);
   const totalPrices = cart.reduce((prev, cur) => cur.totalPrice + prev, 0);
-
-  // Load active order ID from localStorage
-  useEffect(() => {
-    const checkActiveOrder = async () => {
-      const activeOrderId = localStorage.getItem('activeOrderId');
-      if (activeOrderId) {
-        try {
-          const order = await getOrder(activeOrderId);
-          setActiveOrder(order);
-        } catch (error) {
-          console.error('Error fetching active order:', error);
-          localStorage.removeItem('activeOrderId');
-        }
-      }
-    };
-    
-    checkActiveOrder();
-  }, []);
+  const dispatch = useDispatch();
 
   const toggleCart = () => {
     setIsOpen(!isOpen);
   };
 
-  if (!cart.length && !activeOrder) return null;
+  if (!cart.length) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed right-6 bottom-6 z-50">
       {/* Cart Button */}
-      <button 
+      <button
         onClick={toggleCart}
-        className="flex items-center justify-center w-16 h-16 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors relative"
+        className="relative flex h-16 w-16 items-center justify-center rounded-full bg-amber-500 text-white shadow-lg transition-colors hover:bg-amber-600"
       >
         ${totalPrices}
-        {(cart.length > 0 || activeOrder) && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {cart.length || (activeOrder ? 1 : 0)}
+        {(cart.length > 0) && (
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+            {cart.length }
           </span>
         )}
       </button>
 
       {/* Cart Popup */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 w-80 bg-white rounded-lg shadow-xl p-4 border border-stone-200">
-          <h3 className="font-bold text-lg mb-2">Your Cart</h3>
-          
-          {/* Active Order Section */}
-          {activeOrder && (
-            <div className="mb-4 p-3 bg-amber-50 rounded-md">
-              <h4 className="font-semibold text-sm mb-1">Active Order #{activeOrder.id}</h4>
-              <p className="text-sm mb-1">
-                Status: <span className={`font-medium ${activeOrder.status === 'preparing' ? 'text-amber-600' : 'text-green-600'}`}>
-                  {activeOrder.status}
-                </span>
-              </p>
-              <p className="text-sm">
-                Estimated delivery: {new Date(activeOrder.estimatedDelivery).toLocaleTimeString()}
-              </p>
-              <Link 
-                to={`/order/${activeOrder.id}`} 
-                className="text-xs text-amber-600 hover:text-amber-800 block mt-1"
-              >
-                View order details &rarr;
-              </Link>
-            </div>
-          )}
-          
+        <div className="absolute right-0 bottom-20 w-80 rounded-lg border border-stone-200 bg-white p-4 shadow-xl">
+          <h3 className="mb-2 text-lg font-bold">Your Cart</h3>
+
           {/* Cart Items Section */}
-          {cart.length > 0 ? (
+          {cart.length > 0 && (
             <>
               <p className="mb-2">
                 <span className="font-bold text-amber-600">
@@ -85,22 +46,44 @@ function CartOverview() {
                 </span>
               </p>
               <ul className="mb-4 max-h-40 overflow-y-auto">
-                {cart.map(item => (
-                  <li key={item.pizzaId} className="text-sm py-1 border-b border-stone-100">
-                    {item.name} x{item.quantity}
+                {cart.map((item) => (
+                  <li
+                    key={item.pizzaId}
+                    className="flex items-center justify-between border-b border-stone-100 py-1 text-sm"
+                  >
+                    <span>
+                      {item.name} x{item.quantity}
+                    </span>
+                    <div className="space-x-2">
+                      <button
+                        onClick={() =>
+                          dispatch(increaseItemQuantity(item.pizzaId))
+                        }
+                        className="h-8 w-8 rounded-full bg-yellow-500 text-lg font-bold text-white hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() =>
+                          dispatch(decreaseItemQuantity(item.pizzaId))
+                        }
+                        className="h-8 w-8 rounded-full bg-yellow-500 text-lg font-bold text-white hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+                      >
+                        −
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
-              <Link 
-                to="/cart" 
-                className="block w-full text-center bg-stone-800 text-white py-2 rounded hover:bg-stone-900"
+
+              <Link
+                to="/cart"
+                className="block w-full rounded bg-stone-800 py-2 text-center text-white hover:bg-stone-900"
               >
                 Open cart &rarr;
               </Link>
             </>
-          ) : (
-            !activeOrder && <p className="text-sm text-stone-500">Your cart is empty</p>
-          )}
+          ) }
         </div>
       )}
     </div>

@@ -1,63 +1,14 @@
-// src/features/order/OrderHistory.jsx
-import { useState, useEffect } from "react";
+import { useLoaderData } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { getOrder } from "../../services/apiRestaurant";
 import { formatDate, formatCurrency } from "../../utils/helpers";
-
+import { getOrder } from "../../services/apiRestaurant";
 function OrderHistory() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const loadOrderHistory = async () => {
-      try {
-        // Get saved order IDs from localStorage
-        const savedOrderIds = JSON.parse(localStorage.getItem('orderHistory') || '[]');
-        
-        if (savedOrderIds.length === 0) {
-          setOrders([]);
-          setLoading(false);
-          return;
-        }
-
-        // Fetch order details for each ID
-        const orderDetails = await Promise.all(
-          savedOrderIds.map(async (orderId) => {
-            try {
-              return await getOrder(orderId);
-            } catch (err) {
-              console.error(`Error fetching order ${orderId}:`, err);
-              return null;
-            }
-          })
-        );
-
-        // Filter out any failed fetches
-        setOrders(orderDetails.filter(order => order !== null));
-        setLoading(false);
-      } catch (err) {
-        setError("Error loading order history");
-        setLoading(false);
-        console.error(err);
-      }
-    };
-
-    loadOrderHistory();
-  }, []);
-
-  if (loading) {
-    return <div className="px-4 py-6">Loading order history...</div>;
-  }
-
-  if (error) {
-    return <div className="px-4 py-6 text-red-500">{error}</div>;
-  }
+  const orders = useLoaderData();
 
   return (
     <div className="px-4 py-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Your Order History</h2>
-      
+
       {orders.length === 0 ? (
         <p className="text-stone-500">You don't have any order history yet.</p>
       ) : (
@@ -82,7 +33,7 @@ function OrderHistory() {
                   {order.status}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 mt-3">
                 <div>
                   <p className="text-sm font-medium">Items:</p>
@@ -102,7 +53,7 @@ function OrderHistory() {
                   )}
                 </div>
               </div>
-              
+
               <div className="mt-3 text-right">
                 <Link 
                   to={`/order/${order.id}`} 
@@ -120,3 +71,27 @@ function OrderHistory() {
 }
 
 export default OrderHistory;
+
+export async function loader() {
+  try {
+    const savedOrderIds = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+
+    if (savedOrderIds.length === 0) return [];
+
+    const orders = await Promise.all(
+      savedOrderIds.map(async (orderId) => {
+        try {
+          return await getOrder(orderId);
+        } catch (err) {
+          console.error(`Error fetching order ${orderId}:`, err);
+          return null;
+        }
+      })
+    );
+
+    return orders.filter(order => order !== null);
+  } catch (err) {
+    console.error("Loader error:", err);
+    throw new Response("Failed to load order history", { status: 500 });
+  }
+}
