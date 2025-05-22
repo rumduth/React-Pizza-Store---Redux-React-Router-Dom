@@ -8,9 +8,6 @@ import {
   formatDate,
 } from "../../utils/helpers";
 import OrderItem from "./OrderItem";
-import { useFetcher } from "react-router-dom";
-import { useEffect } from "react";
-import UpdateOrder from "./UpdateOrder";
 function Order() {
   const {
     id,
@@ -21,20 +18,11 @@ function Order() {
     estimatedDelivery,
     cart,
   } = useLoaderData();
-  const fetcher = useFetcher();
   const deliveryIn = calcMinutesLeft(estimatedDelivery);
-  useEffect(
-    function () {
-      if (fetcher.state === "idle" && !fetcher.data) {
-        fetcher.load("/menu");
-      }
-    },
-    [fetcher],
-  );
 
   return (
     <div className="px-4 py-5">
-      <div className="mb-5 flex flex-col items-center justify-between gap-4 sm:flex-row sm:gap-0">
+      <div className="mb-20 flex flex-col items-center justify-between gap-4 sm:flex-row sm:gap-0">
         <h2 className="inline-block rounded-2xl border border-amber-200 bg-amber-200 px-2 py-1 text-center text-xl font-bold text-slate-500 hover:bg-amber-400">
           Order #{id} status
         </h2>
@@ -45,7 +33,6 @@ function Order() {
               Priority
             </span>
           )}
-
           <span className="rounded-full bg-green-500 px-2 py-1 text-sky-100 uppercase">
             {status} order
           </span>
@@ -65,15 +52,7 @@ function Order() {
         </div>
         <ul className="mt-4 divide-y divide-amber-500 border-t border-b">
           {cart.map((item) => (
-            <OrderItem
-              item={item}
-              key={item.pizzaId}
-              ingredients={
-                fetcher.data &&
-                fetcher.data.find((pizza) => pizza.id === item.pizzaId)
-                  ?.ingredients
-              }
-            />
+            <OrderItem item={item} key={item.id} />
           ))}
         </ul>
 
@@ -99,11 +78,6 @@ function Order() {
           </p>
         </div>
       </div>
-      {!priority && (
-        <div className="mt-2 text-right">
-          <UpdateOrder />
-        </div>
-      )}
     </div>
   );
 }
