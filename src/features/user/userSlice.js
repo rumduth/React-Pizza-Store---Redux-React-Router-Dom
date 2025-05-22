@@ -32,6 +32,8 @@ const initialState = {
   position: {},
   address: "",
   error: "",
+  hasValidSession: false,
+  diningOption: "", // "dineIn" or "delivery"
 };
 
 const userSlice = createSlice({
@@ -40,6 +42,17 @@ const userSlice = createSlice({
   reducers: {
     updateName(state, action) {
       state.username = action.payload;
+    },
+    setDiningOption(state, action) {
+      state.diningOption = action.payload;
+    },
+    createSession(state) {
+      state.hasValidSession = true;
+    },
+    clearSession(state) {
+      state.hasValidSession = false;
+      state.username = "";
+      state.diningOption = "";
     },
   },
   extraReducers: (builder) =>
@@ -59,5 +72,5 @@ const userSlice = createSlice({
       }),
 });
 
-export const { updateName } = userSlice.actions;
+export const { updateName, setDiningOption, createSession, clearSession } = userSlice.actions;
 export default userSlice.reducer;
