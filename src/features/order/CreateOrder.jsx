@@ -150,6 +150,10 @@ export async function action({ request }) {
   if (Object.keys(errors).length > 0) return errors;
   store.dispatch(clearCart());
   let { id } = await createOrder(orderData);
+  const orderHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+  orderHistory.push(id);
+  localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+  localStorage.setItem('activeOrderId', id);
 
   return redirect(`/order/${id}`);
 }

@@ -9,8 +9,13 @@ export default function Header() {
       <Link to="/" className="tracking-[0.2rem]">
         Fast React Pizza Co.
       </Link>
-      <SearchOrder />
-      <Username />
+      <div className="flex items-center space-x-4">
+        <Link to="/history" className="text-sm hover:text-white">
+          Order History
+        </Link>
+        <SearchOrder />
+        <Username />
+      </div>
     </header>
   );
 }

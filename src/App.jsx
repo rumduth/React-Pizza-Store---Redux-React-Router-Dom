@@ -16,6 +16,7 @@ import { loader as menuLoader } from "./features/menu/Menu";
 import { loader as orderLoader } from "./features/order/Order";
 import { action as createOrderAction } from "./features/order/CreateOrder";
 import { action as updateOrderAction } from "./features/order/UpdateOrder";
+import OrderHistory from "./features/order/OrderHistory";
 
 function ProtectedRoute({ children }) {
   const username = localStorage.getItem('username');
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
 
     children: [
       { path: "", element: <Home /> },
+      { path: 'history', element: <OrderHistory /> },
       {
         path: "menu",
         element: (
