@@ -1,5 +1,5 @@
 // src/ui/AppLayout.jsx
-import { Outlet, useNavigate, useNavigation, useResolvedPath} from "react-router-dom";
+import { Outlet, useNavigation, useResolvedPath} from "react-router-dom";
 import { useSelector } from "react-redux";
 import CartOverview from "../features/cart/CartOverview";
 import Header from "./Header";
@@ -17,7 +17,7 @@ export default function AppLayout() {
         <>
           <Header />
           <div className="pt-16 pb-16"> {/* Add padding to account for fixed header */}
-            <main className="mx-auto max-w-3xl p-4">
+            <main className="mx-auto max-w-5xl p-4">
               <Outlet />
             </main>
           </div>

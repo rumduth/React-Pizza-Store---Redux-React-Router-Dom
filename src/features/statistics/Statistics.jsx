@@ -205,7 +205,6 @@ function Statistics() {
 
 export default Statistics;
 
-
 // Loader function - export this and use it in your router configuration
 export async function loader() {
   try {

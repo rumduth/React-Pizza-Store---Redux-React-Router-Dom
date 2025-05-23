@@ -6,7 +6,7 @@ function OrderHistory() {
   const orders = useLoaderData();
 
   return (
-    <div className="px-4 py-6 max-w-3xl mx-auto">
+    <div className="px-4 py-6 max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Your Order History</h2>
 
       {orders.length === 0 ? (
