@@ -1,6 +1,4 @@
-// src/ui/Header.jsx
 import { Link } from "react-router-dom";
-import SearchOrder from "../features/order/SearchOrder";
 import Username from "../features/user/Username";
 
 export default function Header() {
@@ -13,7 +11,9 @@ export default function Header() {
         <Link to="/history" className="text-sm hover:text-white">
           Order History
         </Link>
-        <SearchOrder />
+        <Link to="/statistics" className="text-sm hover:text-white">
+          Statistics
+        </Link>
         <Username />
       </div>
     </header>

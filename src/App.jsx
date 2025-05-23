@@ -18,6 +18,8 @@ import {loader as historyLoader} from "./features/order/OrderHistory";
 import { action as createOrderAction } from "./features/order/CreateOrder";
 import { action as updateOrderAction } from "./features/order/UpdateOrder";
 import OrderHistory from "./features/order/OrderHistory";
+import Statistics from "./features/statistics/Statistics";
+
 
 function ProtectedRoute({ children }) {
   const username = localStorage.getItem('username');
@@ -34,6 +36,7 @@ const router = createBrowserRouter([
     children: [
       { path: "", element: <Home /> },
       { path: 'history', element: <OrderHistory />, loader: historyLoader },
+      
       {
         path: "menu",
         element: (
@@ -69,6 +72,10 @@ const router = createBrowserRouter([
         action: updateOrderAction,
       },
     ],
+  },
+  {
+    path: "/statistics",
+    element: <Statistics />,
   },
 ]);
 function App({ children }) {
