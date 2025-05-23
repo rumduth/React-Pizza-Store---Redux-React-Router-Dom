@@ -1,73 +1,69 @@
 // src/features/statistics/Statistics.jsx
-import { useState, useEffect } from "react";
-import { getOrder } from "../../services/apiRestaurant";
+import { useState } from "react";
+import { useLoaderData } from "react-router-dom";
 import { formatCurrency } from "../../utils/helpers";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer 
 } from 'recharts';
 
-function Statistics() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [timeFrame, setTimeFrame] = useState('all'); // 'week', 'month', 'year', 'all'
-
-  useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const savedOrderIds = JSON.parse(localStorage.getItem("orderHistory") || "[]");
-        
-        if (savedOrderIds.length === 0) {
-          setOrders([]);
-          setLoading(false);
-          return;
-        }
-
-        const fetchedOrders = await Promise.all(
-          savedOrderIds.map(async (orderId) => {
-            try {
-              return await getOrder(orderId);
-            } catch (err) {
-              console.error(`Error fetching order ${orderId}:`, err);
-              return null;
-            }
-          })
-        );
-
-        const validOrders = fetchedOrders.filter(order => order !== null);
-        setOrders(validOrders);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error loading orders:", err);
-        setError("Failed to load order statistics");
-        setLoading(false);
-      }
+// Loader function - export this and use it in your router configuration
+export async function loader() {
+  try {
+    const { getOrder } = await import("../../services/apiRestaurant");
+    const savedOrderIds = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+    
+    if (savedOrderIds.length === 0) {
+      return { orders: [], error: null };
     }
 
-    fetchOrders();
-  }, []);
+    const fetchedOrders = await Promise.all(
+      savedOrderIds.map(async (orderId) => {
+        try {
+          return await getOrder(orderId);
+        } catch (err) {
+          console.error(`Error fetching order ${orderId}:`, err);
+          return null;
+        }
+      })
+    );
+
+    const validOrders = fetchedOrders.filter(order => order !== null);
+    return { orders: validOrders, error: null };
+  } catch (err) {
+    console.error("Error loading orders:", err);
+    return { orders: [], error: "Failed to load order statistics" };
+  }
+}
+
+function Statistics() {
+  const { orders, error } = useLoaderData();
+  const [timeFrame, setTimeFrame] = useState('all'); // 'week', 'month', 'year', 'all'
 
   // Filter orders based on selected time frame
   const filteredOrders = orders.filter(order => {
     if (timeFrame === 'all') return true;
     
-    const orderDate = new Date(order.createdAt);
+    const orderDate = new Date(order.createdAt || order.estimatedDelivery);
     const now = new Date();
     
+    // Reset time to start of day for accurate comparisons
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const orderDay = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate());
+    
     if (timeFrame === 'week') {
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      return orderDate >= oneWeekAgo;
+      const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return orderDay >= oneWeekAgo;
     }
     
     if (timeFrame === 'month') {
-      const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-      return orderDate >= oneMonthAgo;
+      const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      return orderDay >= oneMonthAgo;
     }
     
     if (timeFrame === 'year') {
-      const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-      return orderDate >= oneYearAgo;
+      const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+      return orderDay >= oneYearAgo;
     }
     
     return true;
@@ -95,8 +91,15 @@ function Statistics() {
   // Calculate spending by month
   const spendingByMonth = {};
   filteredOrders.forEach(order => {
-    const date = new Date(order.createdAt);
-    const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+    const date = new Date(order.createdAt || order.estimatedDelivery);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid date found in order:', order);
+      return;
+    }
+    
+    const monthYear = `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
     
     if (!spendingByMonth[monthYear]) {
       spendingByMonth[monthYear] = 0;
@@ -113,12 +116,12 @@ function Statistics() {
       
       if (aYear !== bYear) return aYear - bYear;
       return aMonth - bMonth;
-    });
+    })
+    .filter(item => item.month !== 'NaN/NaN'); // Filter out invalid dates
 
   // Colors for pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
-  if (loading) return <div className="text-center py-10">Loading statistics...</div>;
   if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
 
   return (
@@ -158,7 +161,7 @@ function Statistics() {
             </div>
             
             <div className="bg-yellow-100 p-4 rounded-lg mb-6">
-              <h3 className="text-lg font-semibold mb-2">Summary</h3>
+              <h3 className="text-lg font-semibold mb-2">Summary ({timeFrame === 'all' ? 'All Time' : timeFrame === 'week' ? 'This Week' : timeFrame === 'month' ? 'This Month' : 'This Year'})</h3>
               <p className="text-xl font-bold">Total Spent: {formatCurrency(totalSpent)}</p>
               <p>Orders: {filteredOrders.length}</p>
               {favoritePizzaData.length > 0 && (

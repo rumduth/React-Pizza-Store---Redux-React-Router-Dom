@@ -1,5 +1,5 @@
 // src/ui/AppLayout.jsx
-import { Outlet, useNavigation, useResolvedPath} from "react-router-dom";
+import { Outlet, useNavigate, useNavigation, useResolvedPath} from "react-router-dom";
 import { useSelector } from "react-redux";
 import CartOverview from "../features/cart/CartOverview";
 import Header from "./Header";
@@ -10,7 +10,6 @@ export default function AppLayout() {
   const isLoading = navigation.state === "loading";
   const pathName = useResolvedPath();
   const hasValidSession = useSelector((state) => state.user.hasValidSession);
-
   return (
     <div className="min-h-screen">
       {isLoading && <Loader />}

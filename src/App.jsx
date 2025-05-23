@@ -14,15 +14,15 @@ import Error from "./ui/Error";
 
 import { loader as menuLoader } from "./features/menu/Menu";
 import { loader as orderLoader } from "./features/order/Order";
-import {loader as historyLoader} from "./features/order/OrderHistory";
+import { loader as historyLoader } from "./features/order/OrderHistory";
+import {loader as statisticsLoader} from "./features/statistics/Statistics";
 import { action as createOrderAction } from "./features/order/CreateOrder";
 import { action as updateOrderAction } from "./features/order/UpdateOrder";
 import OrderHistory from "./features/order/OrderHistory";
 import Statistics from "./features/statistics/Statistics";
 
-
 function ProtectedRoute({ children }) {
-  const username = localStorage.getItem('username');
+  const username = localStorage.getItem("username");
   if (!username) return <Navigate to="/" />;
   return children;
 }
@@ -35,8 +35,24 @@ const router = createBrowserRouter([
 
     children: [
       { path: "", element: <Home /> },
-      { path: 'history', element: <OrderHistory />, loader: historyLoader },
-      
+      {
+        path: "history",
+        element: (
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        ),
+        loader: historyLoader,
+      },
+      {
+        path: "statistics",
+        element: (
+          <ProtectedRoute>
+            <Statistics />
+          </ProtectedRoute>
+        ),
+        loader: statisticsLoader
+      },
       {
         path: "menu",
         element: (
@@ -72,10 +88,6 @@ const router = createBrowserRouter([
         action: updateOrderAction,
       },
     ],
-  },
-  {
-    path: "/statistics",
-    element: <Statistics />,
   },
 ]);
 function App({ children }) {
