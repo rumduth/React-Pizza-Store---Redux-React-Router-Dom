@@ -7,34 +7,6 @@ import {
   PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer 
 } from 'recharts';
 
-// Loader function - export this and use it in your router configuration
-export async function loader() {
-  try {
-    const { getOrder } = await import("../../services/apiRestaurant");
-    const savedOrderIds = JSON.parse(localStorage.getItem("orderHistory") || "[]");
-    
-    if (savedOrderIds.length === 0) {
-      return { orders: [], error: null };
-    }
-
-    const fetchedOrders = await Promise.all(
-      savedOrderIds.map(async (orderId) => {
-        try {
-          return await getOrder(orderId);
-        } catch (err) {
-          console.error(`Error fetching order ${orderId}:`, err);
-          return null;
-        }
-      })
-    );
-
-    const validOrders = fetchedOrders.filter(order => order !== null);
-    return { orders: validOrders, error: null };
-  } catch (err) {
-    console.error("Error loading orders:", err);
-    return { orders: [], error: "Failed to load order statistics" };
-  }
-}
 
 function Statistics() {
   const { orders, error } = useLoaderData();
@@ -232,3 +204,33 @@ function Statistics() {
 }
 
 export default Statistics;
+
+
+// Loader function - export this and use it in your router configuration
+export async function loader() {
+  try {
+    const { getOrder } = await import("../../services/apiRestaurant");
+    const savedOrderIds = JSON.parse(localStorage.getItem("orderHistory") || "[]");
+    
+    if (savedOrderIds.length === 0) {
+      return { orders: [], error: null };
+    }
+
+    const fetchedOrders = await Promise.all(
+      savedOrderIds.map(async (orderId) => {
+        try {
+          return await getOrder(orderId);
+        } catch (err) {
+          console.error(`Error fetching order ${orderId}:`, err);
+          return null;
+        }
+      })
+    );
+
+    const validOrders = fetchedOrders.filter(order => order !== null);
+    return { orders: validOrders, error: null };
+  } catch (err) {
+    console.error("Error loading orders:", err);
+    return { orders: [], error: "Failed to load order statistics" };
+  }
+}
